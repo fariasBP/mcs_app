@@ -48,23 +48,23 @@ class MaterialDataModel {
   }
 }
 
-class ServiceModel {
+class RepairModel {
   late String id;
   late int status;
   late String comments;
   late List<MaterialDataModel> materials;
   late List<ProtocolDataModel> protocols;
 
-  ServiceModel.mapToModel(dynamic data) {
+  RepairModel.mapToModel(dynamic data) {
     id = data['id'];
     status = data['status'];
     comments = data['comments'];
     materials = MaterialDataModel.fromList(data['materials']);
   }
 
-  static List<ServiceModel> fromList(List list) {
-    List<ServiceModel> l = [];
-    l = list.map((e) => ServiceModel.mapToModel(e)).toList();
+  static List<RepairModel> fromList(List list) {
+    List<RepairModel> l = [];
+    l = list.map((e) => RepairModel.mapToModel(e)).toList();
     return l;
   }
 }

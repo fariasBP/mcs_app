@@ -1,4 +1,4 @@
-import 'package:mcs_app/models/service_model.dart';
+import 'package:mcs_app/models/repair_model.dart';
 
 class MachineModel {
   late String companyName;
@@ -6,7 +6,7 @@ class MachineModel {
   late String brandName;
   late String serial;
   late String model;
-  late List<ServiceModel> Services;
+  late List<RepairModel> repairs;
 
   MachineModel.mapToModel(dynamic data) {
     companyName = data['company'];
@@ -14,7 +14,7 @@ class MachineModel {
     brandName = data['brand'];
     serial = data['serial'];
     model = data['model'];
-    Services = ServiceModel.fromList(data['services']);
+    repairs = RepairModel.fromList(data['services']);
   }
 
   static List<MachineModel> fromList(List list) {

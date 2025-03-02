@@ -1,11 +1,11 @@
-part of 'services_bloc.dart';
+part of 'repairs_bloc.dart';
 
-class ServicesState {
+class RepairsState {
   final bool isLoadingCreate;
   final int page;
   final String search;
   final String idMachine;
-  ServicesState(
+  RepairsState(
       {required this.isLoadingCreate,
       required this.page,
       required this.search,

@@ -8,7 +8,7 @@ import 'package:mcs_app/bloc/companies_bloc/companies_bloc.dart';
 import 'package:mcs_app/bloc/machines_bloc/machines_bloc.dart';
 import 'package:mcs_app/bloc/navDsb_bloc/navDsb_bloc.dart';
 import 'package:mcs_app/bloc/protocols_bloc/protocols_bloc.dart';
-import 'package:mcs_app/bloc/services_bloc/services_bloc.dart';
+import 'package:mcs_app/bloc/repairs_bloc/repairs_bloc.dart';
 import 'package:mcs_app/bloc/types_bloc/types_bloc.dart';
 import 'package:mcs_app/screens/auth_screen.dart';
 import 'package:mcs_app/screens/dashboard_screen.dart';
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<TypesBloc>(create: (_) => TypesBloc()),
         BlocProvider<ProtocolsBloc>(create: (_) => ProtocolsBloc()),
         BlocProvider<MachinesBloc>(create: (_) => MachinesBloc()),
-        BlocProvider<ServicesBloc>(create: (_) => ServicesBloc()),
+        BlocProvider<RepairsBloc>(create: (_) => RepairsBloc()),
       ],
       child: MaterialApp(
         title: 'Taller de Reparación',

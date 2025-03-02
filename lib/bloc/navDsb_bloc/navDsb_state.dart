@@ -10,10 +10,10 @@ class NavDsbState {
     ProtocolsScreen(),
     TypesScreen(),
     MachinesScreen(),
-    // ServicesSscreen(),
-    // ClientsScreen(),
-    // InventoryScreen(),
-    // InvoicesScreen(),
+    RepairsScreen(),
+    ClientsScreen(),
+    InventoryScreen(),
+    InvoicesScreen(),
   ];
   final Widget detailsWidget;
   final bool details;
