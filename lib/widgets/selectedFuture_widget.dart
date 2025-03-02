@@ -1,27 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:mcs_app/assets/scripts/prefs.dart';
+import 'package:mcs_app/models/response_model.dart';
 import 'package:mcs_app/widgets/textFormField_widget.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
-class SelectedFutureWidget<T> extends StatelessWidget {
-  final TextEditingController controller = TextEditingController();
+class SelectedFutureWidget<TModel> extends StatelessWidget {
+  final TextEditingController controller;
   final String label;
   final IconData icon;
   final IconData iconSufix;
   final EdgeInsetsGeometry padding;
   final String labelSearch;
-  final Service service;
-  final Function(String) onChange;
-  final Function(T)? builder;
-  SelectedFutureWidget(
+  final Service<TModel> service;
+  final ListTile Function(BuildContext, TModel) builder;
+  const SelectedFutureWidget(
       {super.key,
+      required this.controller,
       required this.label,
       required this.icon,
       this.iconSufix = Icons.arrow_drop_down,
       this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       this.labelSearch = 'Buscar',
       required this.service,
-      required this.onChange,
-      this.builder});
+      required this.builder});
 
   @override
   Widget build(BuildContext context) {
@@ -33,24 +34,27 @@ class SelectedFutureWidget<T> extends StatelessWidget {
           label: label,
           iconSufix: iconSufix,
         ),
-        GestureDetector(
+        InkWell(
           child: Container(
             color: Colors.transparent,
             width: double.infinity,
             height: 55,
           ),
           onTap: () {
-            showDialog(
+            WoltModalSheet.show(
               context: context,
-              builder: (contextD) {
-                return _SelectedBuild(
-                  service: service,
-                  controller: controller,
-                  label: labelSearch,
-                  onChange: onChange,
-                  builder: builder,
-                );
-              },
+              pageListBuilder: (context) => [
+                WoltModalSheetPage(
+                  hasTopBarLayer: false,
+                  child: _SelectedBuild<TModel>(
+                    service: service,
+                    controller: controller,
+                    label: labelSearch,
+                    builder: builder,
+                    padding: padding,
+                  ),
+                ),
+              ],
             );
           },
         ),
@@ -61,65 +65,70 @@ class SelectedFutureWidget<T> extends StatelessWidget {
 
 class _SelectedBuild<T> extends StatefulWidget {
   final TextEditingController controller;
-  final Service service;
+  final Service<T> service;
   final String label;
-  final Function(String) onChange;
-  final Function(T)? builder;
+  final ListTile Function(BuildContext, T) builder;
+  final EdgeInsetsGeometry padding;
 
   const _SelectedBuild(
       {super.key,
       required this.service,
       required this.controller,
       required this.label,
-      required this.onChange,
-      required this.builder});
+      required this.builder,
+      required this.padding});
 
   @override
-  State<_SelectedBuild> createState() => _SelectedBuildState();
+  State<_SelectedBuild<T>> createState() => _SelectedBuildState<T>();
 }
 
-class _SelectedBuildState extends State<_SelectedBuild> {
+class _SelectedBuildState<T> extends State<_SelectedBuild<T>> {
   String search = '';
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: TextFormFieldWidget(
-        controller: widget.controller,
-        icon: Icons.search,
-        label: widget.label,
-        onChanged: (value) {
-          search = value;
-          setState(() {});
-        },
-      ),
-      content: SizedBox(
-        width: 300,
-        child: FutureBuilder(
-          future: widget.service.getSearch(
-            token: Prefs.token,
-            search: search,
-            limit: 10,
-            page: 1,
+    return Padding(
+      padding: widget.padding,
+      child: Column(
+        children: [
+          TextFormFieldWidget(
+            controller: widget.controller,
+            icon: Icons.search,
+            label: widget.label,
+            onChanged: (value) {
+              search = value;
+              setState(() {});
+            },
           ),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final data = snapshot.data;
-              return ListView.separated(
-                itemCount: data!.data.length,
-                separatorBuilder: (context, index) => const Divider(),
-                itemBuilder: (context, index) => widget.builder == null
-                    ? ListTile(
-                        title: Text(data.data[index].name),
-                        onTap: () => widget.onChange(data.data[index].id),
-                      )
-                    : widget.builder!(data.data[index]),
-              );
-            } else {
-              return const Center(child: CircularProgressIndicator());
-            }
-          },
-        ),
+          const SizedBox(height: 15),
+          SingleChildScrollView(
+            child: SizedBox(
+              height: 300,
+              child: FutureBuilder<DataListModel<T>>(
+                future: widget.service.getSearch(
+                  token: Prefs.token,
+                  search: search,
+                  limit: 10,
+                  page: 1,
+                ),
+                builder: (context, AsyncSnapshot<DataListModel<T>> snapshot) {
+                  if (snapshot.hasData) {
+                    final DataListModel<T> data =
+                        snapshot.data as DataListModel<T>;
+                    return ListView.separated(
+                      itemCount: data.data.length,
+                      separatorBuilder: (context, index) => const Divider(),
+                      itemBuilder: (context, index) =>
+                          widget.builder(context, data.data[index]),
+                    );
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

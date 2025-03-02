@@ -19,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   _navigateToLogin() async {
     Prefs.init = await SharedPreferences.getInstance();
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
     String token = Prefs.init?.getString(Prefs.token) ?? '';
     if (mounted) {
       if (token.isNotEmpty) {

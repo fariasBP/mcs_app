@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mcs_app/assets/scripts/prefs.dart';
 
 import 'package:mcs_app/models/response_model.dart';
 import 'package:mcs_app/models/type_model.dart';
 
-class TypesService {
+class TypesService implements Service<TypeModel> {
   static final mainUrl = dotenv.get('API_URL', fallback: 'API_URL not found');
   static Future<String> create({
     required String token,
@@ -62,9 +63,10 @@ class TypesService {
     }).catchError((err) => throw err);
   }
 
-  static Future<DataListCommonModel> getTypesCommon(
-      {String search = '',
-      required String token,
+  @override
+  Future<DataListModel<TypeModel>> getSearch(
+      {required String token,
+      required String search,
       required int limit,
       required int page}) {
     final headers = {
@@ -81,7 +83,7 @@ class TypesService {
       ResponseModel r = ResponseModel(data);
 
       if (r.code != 200) throw r.msg;
-      return DataListCommonModel(
+      return DataListModel<TypeModel>(
         count: data['count'],
         data: TypeModel.fromList(data['data']),
       );

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mcs_app/bloc/machines_bloc/machines_bloc.dart';
+import 'package:mcs_app/models/brand_model.dart';
+import 'package:mcs_app/models/company_model.dart';
 import 'package:mcs_app/models/machine_model.dart';
 import 'package:mcs_app/models/response_model.dart';
+import 'package:mcs_app/models/type_model.dart';
+import 'package:mcs_app/services/brands_service.dart';
 import 'package:mcs_app/services/companies_service.dart';
 import 'package:mcs_app/services/machines_service.dart';
+import 'package:mcs_app/services/types_service.dart';
 import 'package:mcs_app/widgets/button_widget.dart';
 import 'package:mcs_app/widgets/header_widget.dart';
 import 'package:mcs_app/widgets/msgDialog_widget.dart';
@@ -14,6 +19,9 @@ import 'package:mcs_app/widgets/textFormField_widget.dart';
 import 'package:mcs_app/widgets/tile_widget.dart';
 
 class MachinesScreen extends StatelessWidget {
+  final TextEditingController _labelCompanyController = TextEditingController();
+  final TextEditingController _labelBrandController = TextEditingController();
+  final TextEditingController _labelTypeController = TextEditingController();
   final TextEditingController _serialController = TextEditingController();
   final TextEditingController _modelController = TextEditingController();
   MachinesScreen({super.key});
@@ -49,16 +57,60 @@ class MachinesScreen extends StatelessWidget {
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    SelectedFutureWidget(
-                                      label: 'Empresa',
+                                    SelectedFutureWidget<CompanyModel>(
+                                      controller: _labelCompanyController,
+                                      label: 'Empresa o Taller',
                                       service: CompaniesService(),
                                       icon: Icons.apartment,
-                                      onChange: (value) {
-                                        BlocProvider.of<MachinesBloc>(contextB)
-                                            .add(SetIdCompanyEvent(
-                                                idCompany: value));
-                                        Navigator.of(contextB).pop();
-                                      },
+                                      builder: (contextC, value) => ListTile(
+                                        title: Text(value.name),
+                                        onTap: () {
+                                          BlocProvider.of<MachinesBloc>(
+                                                  contextB)
+                                              .add(SetIdCompanyEvent(
+                                                  idCompany: value.id));
+                                          _labelCompanyController.text =
+                                              value.name;
+                                          Navigator.of(contextC).pop();
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    SelectedFutureWidget<TypeModel>(
+                                        controller: _labelTypeController,
+                                        label: 'Tipo de Máquina',
+                                        service: TypesService(),
+                                        icon: Icons.format_size,
+                                        builder: (contextC, value) => ListTile(
+                                              title: Text(value.name),
+                                              onTap: () {
+                                                BlocProvider.of<MachinesBloc>(
+                                                        contextB)
+                                                    .add(SetIdTypeEvent(
+                                                        idType: value.id));
+                                                _labelTypeController.text =
+                                                    value.name;
+                                                Navigator.of(contextC).pop();
+                                              },
+                                            )),
+                                    const SizedBox(height: 20),
+                                    SelectedFutureWidget<BrandModel>(
+                                      controller: _labelBrandController,
+                                      label: 'Marca de la maquina',
+                                      service: BrandsService(),
+                                      icon: Icons.branding_watermark,
+                                      builder: (contextC, value) => ListTile(
+                                        title: Text(value.name),
+                                        onTap: () {
+                                          BlocProvider.of<MachinesBloc>(
+                                                  contextB)
+                                              .add(SetIdBrandEvent(
+                                                  idBrand: value.id));
+                                          _labelBrandController.text =
+                                              value.name;
+                                          Navigator.of(contextC).pop();
+                                        },
+                                      ),
                                     ),
                                     const SizedBox(height: 20),
                                     TextFormFieldWidget(
@@ -85,42 +137,41 @@ class MachinesScreen extends StatelessWidget {
                                 ButtonWidget(
                                   isLoading: stateB.isLoadingCreate,
                                   onPressed: () {
-                                    print('idCompany: ${stateB.idCompany}');
-                                    // BlocProvider.of<MachinesBloc>(contextD)
-                                    //     .add(StartLoadingCreateMachineEvent());
-                                    // MachinesService.create(
-                                    //   companyId: state.idCompany,
-                                    //   typeId: state.idType,
-                                    //   brandId: state.idBrand,
-                                    //   model: _modelController.text,
-                                    //   serial: _serialController.text,
-                                    //   token: '',
-                                    // ).then((value) {
-                                    //   BlocProvider.of<MachinesBloc>(contextD)
-                                    //       .add(EndLoadingCreateMachineEvent());
-                                    //   Navigator.of(context).pop();
-                                    //   showDialog(
-                                    //     context: context,
-                                    //     builder: (context) =>
-                                    //         const MsgDialogWidget(
-                                    //       msg: 'Se creo la maquina con exito',
-                                    //       typeMsg: MsgDialogWidget.SUCCESS,
-                                    //     ),
-                                    //   );
-                                    // }).catchError((err) {
-                                    //   BlocProvider.of<MachinesBloc>(contextD)
-                                    //       .add(EndLoadingCreateMachineEvent());
-                                    //   showDialog(
-                                    //     context: context,
-                                    //     builder: (context) => MsgDialogWidget(
-                                    //       msg: err.toString(),
-                                    //       typeMsg: MsgDialogWidget.DANGER,
-                                    //     ),
-                                    //   );
-                                    // });
+                                    BlocProvider.of<MachinesBloc>(contextB)
+                                        .add(StartLoadingCreateMachineEvent());
+                                    MachinesService.create(
+                                      companyId: stateB.idCompany,
+                                      typeId: stateB.idType,
+                                      brandId: stateB.idBrand,
+                                      model: _modelController.text,
+                                      serial: _serialController.text,
+                                      token: '',
+                                    ).then((value) {
+                                      BlocProvider.of<MachinesBloc>(contextB)
+                                          .add(EndLoadingCreateMachineEvent());
+                                      Navigator.of(context).pop();
+                                      showDialog(
+                                        context: contextB,
+                                        builder: (contextB) =>
+                                            const MsgDialogWidget(
+                                          msg: 'Se creo la maquina con exito',
+                                          typeMsg: MsgDialogWidget.SUCCESS,
+                                        ),
+                                      );
+                                    }).catchError((err) {
+                                      BlocProvider.of<MachinesBloc>(contextB)
+                                          .add(EndLoadingCreateMachineEvent());
+                                      showDialog(
+                                        context: contextB,
+                                        builder: (contextB) => MsgDialogWidget(
+                                          msg: err.toString(),
+                                          typeMsg: MsgDialogWidget.DANGER,
+                                        ),
+                                      );
+                                    });
                                   },
                                   style: ButtonWidget.SUCCESS,
-                                  label: 'Crear Marca',
+                                  label: 'Crear Máquina',
                                 ),
                               ],
                             ),
