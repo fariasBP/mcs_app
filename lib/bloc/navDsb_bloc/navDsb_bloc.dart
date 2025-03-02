@@ -1,8 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:mcs_app/screens/brands_screen.dart';
+import 'package:mcs_app/screens/companies_screen.dart';
 
 import 'package:mcs_app/screens/details_screen.dart';
+import 'package:mcs_app/screens/machines_screen.dart';
 import 'package:mcs_app/screens/overview_screen.dart';
+import 'package:mcs_app/screens/protocols_screen.dart';
+import 'package:mcs_app/screens/types_screen.dart';
 
 part 'navDsb_state.dart';
 part 'navDsb_event.dart';

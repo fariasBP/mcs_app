@@ -25,3 +25,8 @@ class SetIdBrandEvent extends MachinesEvent {
   final String idBrand;
   SetIdBrandEvent({required this.idBrand});
 }
+
+class SearchCompanyEvent extends MachinesEvent {
+  final String searchCompany;
+  SearchCompanyEvent({required this.searchCompany});
+}

@@ -4,12 +4,12 @@ class NavDsbState {
   final int index;
   final Widget widget;
   static final List<Widget> widgets = [
-    OverviewSwidget(),
-    // CompaniesSwidget(),
-    // BrandsSwidget(),
-    // ProtocolsSwidget(),
-    // TypesSwidget(),
-    // MachinesSwidget(),
+    const OverviewScreen(),
+    CompaniesScreen(),
+    BrandsScreen(),
+    ProtocolsScreen(),
+    TypesScreen(),
+    MachinesScreen(),
     // ServicesSscreen(),
     // ClientsScreen(),
     // InventoryScreen(),

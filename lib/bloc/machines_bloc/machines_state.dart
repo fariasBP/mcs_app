@@ -7,6 +7,7 @@ class MachinesState {
   final String idType;
   final String idBrand;
   final int page;
+  final String searchCompany;
   MachinesState({
     required this.search,
     required this.isLoadingCreate,
@@ -14,5 +15,6 @@ class MachinesState {
     required this.idCompany,
     required this.idType,
     required this.idBrand,
+    required this.searchCompany,
   });
 }

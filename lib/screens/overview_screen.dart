@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mcs_app/widgets/header_widget.dart';
 
-class OverviewSwidget extends StatelessWidget {
-  const OverviewSwidget({super.key});
+class OverviewScreen extends StatelessWidget {
+  const OverviewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
