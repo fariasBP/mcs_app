@@ -73,13 +73,16 @@ class MachinesBloc extends Bloc<MachinesEvent, MachinesState> {
           idBrand: event.idBrand,
           searchCompany: state.searchCompany)),
     );
-    on<SearchCompanyEvent>((event, emit) => emit(MachinesState(
-        isLoadingCreate: state.isLoadingCreate,
-        search: state.search,
-        page: state.page,
-        idCompany: state.idCompany,
-        idType: state.idType,
-        idBrand: state.idBrand,
-        searchCompany: event.searchCompany)));
+    on<SearchCompanyEvent>((event, emit) {
+      // print(event.searchCompany);
+      emit(MachinesState(
+          isLoadingCreate: state.isLoadingCreate,
+          search: state.search,
+          page: state.page,
+          idCompany: state.idCompany,
+          idType: state.idType,
+          idBrand: state.idBrand,
+          searchCompany: event.searchCompany));
+    });
   }
 }

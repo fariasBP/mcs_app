@@ -13,7 +13,7 @@ import 'package:mcs_app/widgets/header_widget.dart';
 import 'package:mcs_app/widgets/modalTextFormFieldWidget.dart';
 import 'package:mcs_app/widgets/msgDialog_widget.dart';
 import 'package:mcs_app/widgets/searchDsb_widget.dart';
-import 'package:mcs_app/widgets/selectCompany_swidget.dart';
+import 'package:mcs_app/widgets/selectedFuture_widget.dart';
 import 'package:mcs_app/widgets/textFormField_widget.dart';
 import 'package:mcs_app/widgets/tile_widget.dart';
 
@@ -28,7 +28,7 @@ class MachinesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MachinesBloc, MachinesState>(
-      builder: (context, state) => Container(
+      builder: (contextB, state) => Container(
         color: Colors.grey[100],
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -43,158 +43,94 @@ class MachinesScreen extends StatelessWidget {
                     label: 'Nueva Máquina',
                     style: ButtonWidget.NORMAL,
                     icon: Icons.add,
-                    onPressed: () => showDialog(
-                      context: context,
-                      builder: (BuildContext contextD) {
-                        return BlocBuilder<MachinesBloc, MachinesState>(
-                          builder: (contextE, stateE) => AlertDialog(
-                            scrollable: true,
-                            title: const Text('Crear Máquina'),
-                            content: SizedBox(
-                              width: 300,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ModalTextFormFieldWidget(
-                                    controller: _labelCompanyController,
-                                    label: 'Talleres o Empresas',
-                                    icon: Icons.apartment,
-                                    child: SelectFutureCommonWidget(
-                                      label: 'Talleres o Empresas',
-                                      search: '',
-                                      onSearchChange: (value) {},
-                                      future: CompaniesService.getCompanies(
-                                          token: '',
-                                          search: '',
-                                          limit: 5,
-                                          page: 1),
-                                      labelController: _labelCompanyController,
-                                      onChange: (String value) =>
-                                          BlocProvider.of<MachinesBloc>(
-                                                  contextE)
-                                              .add(SetIdCompanyEvent(
-                                                  idCompany: value)),
+                    onPressed: () {
+                      showDialog(
+                        context: contextB,
+                        builder: (BuildContext contextD) {
+                          return BlocBuilder<MachinesBloc, MachinesState>(
+                            builder: (contextD, stateB) => AlertDialog(
+                              scrollable: true,
+                              title: const Text('Nueva Máquina'),
+                              content: SizedBox(
+                                width: 300,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SelectedFutureWidget(
+                                      label: 'Empresa',
+                                      service: CompaniesService(),
+                                      icon: Icons.apartment,
+                                      onChange: (value) {
+                                        print(value);
+                                      },
                                     ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  ModalTextFormFieldWidget(
-                                    controller: _labelTypeController,
-                                    label: 'Tipo de Máquina',
-                                    icon: Icons.fax,
-                                    child: SelectCompanySwidget(
-                                      labelCompanyController:
-                                          _labelCompanyController,
-                                      onChange: (String value) =>
-                                          BlocProvider.of<MachinesBloc>(
-                                                  contextE)
-                                              .add(SetIdCompanyEvent(
-                                                  idCompany: value)),
+                                    const SizedBox(height: 20),
+                                    TextFormFieldWidget(
+                                      controller: _serialController,
+                                      label: 'Serial de la Máquina',
+                                      icon: Icons.fingerprint,
                                     ),
-                                    // child: SelectFutureWidget(
-                                    //   label: 'Tipo de Máquina',
-                                    //   future: TypesService.getTypes(
-                                    //       token: '',
-                                    //       search: stateE.label,
-                                    //       limit: 5,
-                                    //       page: 1),
-                                    //   labelController: _labelTypeController,
-                                    //   onChange: (String value) => BlocProvider
-                                    //           .of<MachinesBloc>(contextE)
-                                    //       .add(SetIdTypeEvent(idType: value)),
-                                    // ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  ModalTextFormFieldWidget(
-                                    controller: _labelBrandController,
-                                    label: 'Marca',
-                                    icon: Icons.branding_watermark,
-                                    child: SelectCompanySwidget(
-                                      labelCompanyController:
-                                          _labelCompanyController,
-                                      onChange: (String value) =>
-                                          BlocProvider.of<MachinesBloc>(
-                                                  contextE)
-                                              .add(SetIdCompanyEvent(
-                                                  idCompany: value)),
+                                    const SizedBox(height: 20),
+                                    TextFormFieldWidget(
+                                      controller: _modelController,
+                                      label: 'Modelo de la Máquina',
+                                      icon: Icons.format_color_fill,
                                     ),
-                                    // child: SelectFutureWidget(
-                                    //   future: BrandsService.getBrands(
-                                    //       token: '',
-                                    //       search: '',
-                                    //       limit: 5,
-                                    //       page: 1),
-                                    //   labelController: _labelBrandController,
-                                    //   onChange: (String value) => BlocProvider
-                                    //           .of<MachinesBloc>(contextE)
-                                    //       .add(SetIdBrandEvent(idBrand: value)),
-                                    // ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  TextFormFieldWidget(
-                                    controller: _serialController,
-                                    label: 'Serial de la Máquina',
-                                    icon: Icons.fingerprint,
-                                  ),
-                                  const SizedBox(height: 20),
-                                  TextFormFieldWidget(
-                                    controller: _modelController,
-                                    label: 'Modelo de la Máquina',
-                                    icon: Icons.format_color_fill,
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Cancelar'),
-                              ),
-                              ButtonWidget(
-                                isLoading: stateE.isLoadingCreate,
-                                onPressed: () {
-                                  BlocProvider.of<MachinesBloc>(contextE)
-                                      .add(StartLoadingCreateMachineEvent());
-                                  MachinesService.create(
-                                    companyId: stateE.idCompany,
-                                    typeId: stateE.idType,
-                                    brandId: stateE.idBrand,
-                                    model: _modelController.text,
-                                    serial: _serialController.text,
-                                    token: '',
-                                  ).then((value) {
-                                    BlocProvider.of<MachinesBloc>(contextE)
-                                        .add(EndLoadingCreateMachineEvent());
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
                                     Navigator.of(context).pop();
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) =>
-                                          const MsgDialogWidget(
-                                        msg: 'Se creo la maquina con exito',
-                                        typeMsg: MsgDialogWidget.SUCCESS,
-                                      ),
-                                    );
-                                  }).catchError((err) {
-                                    BlocProvider.of<MachinesBloc>(contextE)
-                                        .add(EndLoadingCreateMachineEvent());
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => MsgDialogWidget(
-                                        msg: err.toString(),
-                                        typeMsg: MsgDialogWidget.DANGER,
-                                      ),
-                                    );
-                                  });
-                                },
-                                style: ButtonWidget.SUCCESS,
-                                label: 'Crear Marca',
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                                  },
+                                  child: const Text('Cancelar'),
+                                ),
+                                ButtonWidget(
+                                  isLoading: state.isLoadingCreate,
+                                  onPressed: () {
+                                    BlocProvider.of<MachinesBloc>(contextD)
+                                        .add(StartLoadingCreateMachineEvent());
+                                    MachinesService.create(
+                                      companyId: state.idCompany,
+                                      typeId: state.idType,
+                                      brandId: state.idBrand,
+                                      model: _modelController.text,
+                                      serial: _serialController.text,
+                                      token: '',
+                                    ).then((value) {
+                                      BlocProvider.of<MachinesBloc>(contextD)
+                                          .add(EndLoadingCreateMachineEvent());
+                                      Navigator.of(context).pop();
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) =>
+                                            const MsgDialogWidget(
+                                          msg: 'Se creo la maquina con exito',
+                                          typeMsg: MsgDialogWidget.SUCCESS,
+                                        ),
+                                      );
+                                    }).catchError((err) {
+                                      BlocProvider.of<MachinesBloc>(contextD)
+                                          .add(EndLoadingCreateMachineEvent());
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => MsgDialogWidget(
+                                          msg: err.toString(),
+                                          typeMsg: MsgDialogWidget.DANGER,
+                                        ),
+                                      );
+                                    });
+                                  },
+                                  style: ButtonWidget.SUCCESS,
+                                  label: 'Crear Marca',
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
@@ -225,6 +161,17 @@ class MachinesScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getStateE(BuildContext context) {
+    String str = '';
+    BlocBuilder<MachinesBloc, MachinesState>(
+      builder: (context, state) {
+        str = state.searchCompany;
+        return Container();
+      },
+    );
+    return str;
   }
 
   void _handleNewMachine(BuildContext context,
