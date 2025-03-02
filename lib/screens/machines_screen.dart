@@ -3,14 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mcs_app/bloc/machines_bloc/machines_bloc.dart';
 import 'package:mcs_app/models/machine_model.dart';
 import 'package:mcs_app/models/response_model.dart';
-import 'package:mcs_app/services/brands_service.dart';
 import 'package:mcs_app/services/companies_service.dart';
 import 'package:mcs_app/services/machines_service.dart';
-import 'package:mcs_app/services/types_service.dart';
-import 'package:mcs_app/widgets/SelectFutureWidget.dart';
 import 'package:mcs_app/widgets/button_widget.dart';
 import 'package:mcs_app/widgets/header_widget.dart';
-import 'package:mcs_app/widgets/modalTextFormFieldWidget.dart';
 import 'package:mcs_app/widgets/msgDialog_widget.dart';
 import 'package:mcs_app/widgets/searchDsb_widget.dart';
 import 'package:mcs_app/widgets/selectedFuture_widget.dart';
@@ -18,9 +14,6 @@ import 'package:mcs_app/widgets/textFormField_widget.dart';
 import 'package:mcs_app/widgets/tile_widget.dart';
 
 class MachinesScreen extends StatelessWidget {
-  final TextEditingController _labelCompanyController = TextEditingController();
-  final TextEditingController _labelTypeController = TextEditingController();
-  final TextEditingController _labelBrandController = TextEditingController();
   final TextEditingController _serialController = TextEditingController();
   final TextEditingController _modelController = TextEditingController();
   MachinesScreen({super.key});
@@ -28,7 +21,7 @@ class MachinesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MachinesBloc, MachinesState>(
-      builder: (contextB, state) => Container(
+      builder: (context, state) => Container(
         color: Colors.grey[100],
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -45,10 +38,10 @@ class MachinesScreen extends StatelessWidget {
                     icon: Icons.add,
                     onPressed: () {
                       showDialog(
-                        context: contextB,
-                        builder: (BuildContext contextD) {
+                        context: context,
+                        builder: (BuildContext contextB) {
                           return BlocBuilder<MachinesBloc, MachinesState>(
-                            builder: (contextD, stateB) => AlertDialog(
+                            builder: (contextB, stateB) => AlertDialog(
                               scrollable: true,
                               title: const Text('Nueva Máquina'),
                               content: SizedBox(
@@ -61,7 +54,10 @@ class MachinesScreen extends StatelessWidget {
                                       service: CompaniesService(),
                                       icon: Icons.apartment,
                                       onChange: (value) {
-                                        print(value);
+                                        BlocProvider.of<MachinesBloc>(contextB)
+                                            .add(SetIdCompanyEvent(
+                                                idCompany: value));
+                                        Navigator.of(contextB).pop();
                                       },
                                     ),
                                     const SizedBox(height: 20),
@@ -87,40 +83,41 @@ class MachinesScreen extends StatelessWidget {
                                   child: const Text('Cancelar'),
                                 ),
                                 ButtonWidget(
-                                  isLoading: state.isLoadingCreate,
+                                  isLoading: stateB.isLoadingCreate,
                                   onPressed: () {
-                                    BlocProvider.of<MachinesBloc>(contextD)
-                                        .add(StartLoadingCreateMachineEvent());
-                                    MachinesService.create(
-                                      companyId: state.idCompany,
-                                      typeId: state.idType,
-                                      brandId: state.idBrand,
-                                      model: _modelController.text,
-                                      serial: _serialController.text,
-                                      token: '',
-                                    ).then((value) {
-                                      BlocProvider.of<MachinesBloc>(contextD)
-                                          .add(EndLoadingCreateMachineEvent());
-                                      Navigator.of(context).pop();
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) =>
-                                            const MsgDialogWidget(
-                                          msg: 'Se creo la maquina con exito',
-                                          typeMsg: MsgDialogWidget.SUCCESS,
-                                        ),
-                                      );
-                                    }).catchError((err) {
-                                      BlocProvider.of<MachinesBloc>(contextD)
-                                          .add(EndLoadingCreateMachineEvent());
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => MsgDialogWidget(
-                                          msg: err.toString(),
-                                          typeMsg: MsgDialogWidget.DANGER,
-                                        ),
-                                      );
-                                    });
+                                    print('idCompany: ${stateB.idCompany}');
+                                    // BlocProvider.of<MachinesBloc>(contextD)
+                                    //     .add(StartLoadingCreateMachineEvent());
+                                    // MachinesService.create(
+                                    //   companyId: state.idCompany,
+                                    //   typeId: state.idType,
+                                    //   brandId: state.idBrand,
+                                    //   model: _modelController.text,
+                                    //   serial: _serialController.text,
+                                    //   token: '',
+                                    // ).then((value) {
+                                    //   BlocProvider.of<MachinesBloc>(contextD)
+                                    //       .add(EndLoadingCreateMachineEvent());
+                                    //   Navigator.of(context).pop();
+                                    //   showDialog(
+                                    //     context: context,
+                                    //     builder: (context) =>
+                                    //         const MsgDialogWidget(
+                                    //       msg: 'Se creo la maquina con exito',
+                                    //       typeMsg: MsgDialogWidget.SUCCESS,
+                                    //     ),
+                                    //   );
+                                    // }).catchError((err) {
+                                    //   BlocProvider.of<MachinesBloc>(contextD)
+                                    //       .add(EndLoadingCreateMachineEvent());
+                                    //   showDialog(
+                                    //     context: context,
+                                    //     builder: (context) => MsgDialogWidget(
+                                    //       msg: err.toString(),
+                                    //       typeMsg: MsgDialogWidget.DANGER,
+                                    //     ),
+                                    //   );
+                                    // });
                                   },
                                   style: ButtonWidget.SUCCESS,
                                   label: 'Crear Marca',

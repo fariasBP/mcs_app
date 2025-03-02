@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mcs_app/assets/scripts/prefs.dart';
 import 'package:mcs_app/widgets/textFormField_widget.dart';
 
-class SelectedFutureWidget extends StatelessWidget {
+class SelectedFutureWidget<T> extends StatelessWidget {
   final TextEditingController controller = TextEditingController();
   final String label;
   final IconData icon;
@@ -11,16 +11,17 @@ class SelectedFutureWidget extends StatelessWidget {
   final String labelSearch;
   final Service service;
   final Function(String) onChange;
-  SelectedFutureWidget({
-    super.key,
-    required this.label,
-    required this.icon,
-    this.iconSufix = Icons.arrow_drop_down,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-    this.labelSearch = 'Buscar',
-    required this.service,
-    required this.onChange,
-  });
+  final Function(T)? builder;
+  SelectedFutureWidget(
+      {super.key,
+      required this.label,
+      required this.icon,
+      this.iconSufix = Icons.arrow_drop_down,
+      this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      this.labelSearch = 'Buscar',
+      required this.service,
+      required this.onChange,
+      this.builder});
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +48,7 @@ class SelectedFutureWidget extends StatelessWidget {
                   controller: controller,
                   label: labelSearch,
                   onChange: onChange,
+                  builder: builder,
                 );
               },
             );
@@ -57,18 +59,20 @@ class SelectedFutureWidget extends StatelessWidget {
   }
 }
 
-class _SelectedBuild extends StatefulWidget {
+class _SelectedBuild<T> extends StatefulWidget {
   final TextEditingController controller;
   final Service service;
   final String label;
   final Function(String) onChange;
+  final Function(T)? builder;
 
   const _SelectedBuild(
       {super.key,
       required this.service,
       required this.controller,
       required this.label,
-      required this.onChange});
+      required this.onChange,
+      required this.builder});
 
   @override
   State<_SelectedBuild> createState() => _SelectedBuildState();
@@ -104,10 +108,12 @@ class _SelectedBuildState extends State<_SelectedBuild> {
               return ListView.separated(
                 itemCount: data!.data.length,
                 separatorBuilder: (context, index) => const Divider(),
-                itemBuilder: (context, index) => ListTile(
-                  title: Text(data.data[index].name),
-                  onTap: () => widget.onChange(data.data[index].id),
-                ),
+                itemBuilder: (context, index) => widget.builder == null
+                    ? ListTile(
+                        title: Text(data.data[index].name),
+                        onTap: () => widget.onChange(data.data[index].id),
+                      )
+                    : widget.builder!(data.data[index]),
               );
             } else {
               return const Center(child: CircularProgressIndicator());
