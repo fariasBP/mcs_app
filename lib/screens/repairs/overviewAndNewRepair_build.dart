@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mcs_app/assets/scripts/prefs.dart';
 import 'package:mcs_app/bloc/repairs_bloc/repairs_bloc.dart';
+import 'package:mcs_app/models/machine_model.dart';
 import 'package:mcs_app/screens/repairs/stateRepair_Build.dart';
+import 'package:mcs_app/services/machines_service.dart';
 import 'package:mcs_app/services/repairs_service.dart';
 import 'package:mcs_app/widgets/button_widget.dart';
 import 'package:mcs_app/widgets/msgDialog_widget.dart';
+import 'package:mcs_app/widgets/selectedFuture_widget.dart';
 import 'package:mcs_app/widgets/title_widget.dart';
 
 class OverviewAndNewRepairBuild extends StatelessWidget {
   OverviewAndNewRepairBuild({super.key});
 
-  final _labelMachineController = TextEditingController();
+  final TextEditingController _labelMachineController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +55,9 @@ class OverviewAndNewRepairBuild extends StatelessWidget {
                 style: ButtonWidget.NORMAL,
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (BuildContext contextD) {
+                  builder: (BuildContext contextB) {
                     return BlocBuilder<RepairsBloc, RepairsState>(
-                      builder: (contextE, stateE) => AlertDialog(
+                      builder: (contextB, stateB) => AlertDialog(
                         scrollable: true,
                         title: const Text('Nuevo Servicio'),
                         content: SizedBox(
@@ -62,7 +65,24 @@ class OverviewAndNewRepairBuild extends StatelessWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('aqui'),
+                              SelectedFutureWidget<MachineModel>(
+                                controller: _labelMachineController,
+                                label: 'Maquina',
+                                service: MachinesService(),
+                                icon: Icons.apartment,
+                                builder: (contextC, value) => ListTile(
+                                  title: Text(
+                                      '${value.typeName} - ${value.brandName} - ${value.serial}'),
+                                  subtitle: Text(value.companyName),
+                                  onTap: () {
+                                    BlocProvider.of<RepairsBloc>(contextB).add(
+                                        SetIdMachineRepairsEvent(
+                                            idMachine: value.id));
+                                    _labelMachineController.text = value.serial;
+                                    Navigator.of(contextC).pop();
+                                  },
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -75,16 +95,15 @@ class OverviewAndNewRepairBuild extends StatelessWidget {
                           ),
                           ButtonWidget(
                             onPressed: () {
-                              BlocProvider.of<RepairsBloc>(contextE)
+                              BlocProvider.of<RepairsBloc>(contextB)
                                   .add(StartLoadingCreateRepairsEvent());
                               RepairsService.newService(
                                       token:
                                           Prefs.init?.getString(Prefs.token) ??
                                               '',
-                                      idMachine: stateE.idMachine)
+                                      idMachine: stateB.idMachine)
                                   .then((msg) {
-                                print('aquiiiii');
-                                BlocProvider.of<RepairsBloc>(contextE)
+                                BlocProvider.of<RepairsBloc>(contextB)
                                     .add(EndLoadingCreateRepairsEvent());
                                 Navigator.of(context).pop();
                                 showDialog(
@@ -95,7 +114,7 @@ class OverviewAndNewRepairBuild extends StatelessWidget {
                                   ),
                                 );
                               }).catchError((err) {
-                                BlocProvider.of<RepairsBloc>(contextE)
+                                BlocProvider.of<RepairsBloc>(contextB)
                                     .add(EndLoadingCreateRepairsEvent());
                                 showDialog(
                                   context: context,

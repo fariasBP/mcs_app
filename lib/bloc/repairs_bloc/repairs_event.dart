@@ -15,3 +15,10 @@ class SetIdMachineRepairsEvent extends RepairsEvent {
   final String idMachine;
   SetIdMachineRepairsEvent({required this.idMachine});
 }
+
+class SetIntervalDatetimeRepairsEvent extends RepairsEvent {
+  final String startedAt;
+  final String endedAt;
+  SetIntervalDatetimeRepairsEvent(
+      {required this.startedAt, required this.endedAt});
+}

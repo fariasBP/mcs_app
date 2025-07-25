@@ -1,3 +1,5 @@
+import 'package:mcs_app/models/machine_model.dart';
+
 class ProblemDataModel {
   late String problem;
   late String solution;
@@ -50,16 +52,18 @@ class MaterialDataModel {
 
 class RepairModel {
   late String id;
+  late DateTime startedAt;
+  late DateTime? endedAt;
   late int status;
-  late String comments;
-  late List<MaterialDataModel> materials;
-  late List<ProtocolDataModel> protocols;
+  late MachineModel machine;
 
   RepairModel.mapToModel(dynamic data) {
     id = data['id'];
-    status = data['status'];
-    comments = data['comments'];
-    materials = MaterialDataModel.fromList(data['materials']);
+    startedAt = DateTime.parse(data['started_at']);
+    endedAt =
+        data['ended_at'] != null ? DateTime.parse(data['ended_at']) : null;
+    status = data['status'] ?? 0;
+    machine = MachineModel.mapToModel(data['machine']);
   }
 
   static List<RepairModel> fromList(List list) {

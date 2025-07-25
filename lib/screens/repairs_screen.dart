@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mcs_app/assets/scripts/prefs.dart';
 import 'package:mcs_app/bloc/navDsb_bloc/navDsb_bloc.dart';
 import 'package:mcs_app/bloc/repairs_bloc/repairs_bloc.dart';
+import 'package:mcs_app/models/repair_model.dart';
+import 'package:mcs_app/models/response_model.dart';
 import 'package:mcs_app/screens/repairs/overviewAndNewRepair_build.dart';
 import 'package:mcs_app/screens/repairs/repair_detail.dart';
+import 'package:mcs_app/services/repairs_service.dart';
+import 'package:mcs_app/widgets/button_widget.dart';
 import 'package:mcs_app/widgets/header_widget.dart';
 import 'package:mcs_app/widgets/textFormField_widget.dart';
 import 'package:mcs_app/widgets/title_widget.dart';
+import 'package:date_picker_plus/date_picker_plus.dart';
+import 'package:intl/intl.dart';
 
 class RepairsScreen extends StatelessWidget {
   const RepairsScreen({super.key});
@@ -14,7 +21,7 @@ class RepairsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RepairsBloc, RepairsState>(
-      builder: (contextB, state) => Column(
+      builder: (context, state) => Column(
         children: [
           const HeaderWidget(title: 'SERVICIOS'),
           Expanded(
@@ -28,9 +35,9 @@ class RepairsScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           const SizedBox(height: 16),
-                          _buildSearchSection(contextB),
+                          _buildSearchSection(context),
                           const SizedBox(height: 16),
-                          _buildResultsSection(),
+                          _buildResultsSection(state),
                           const SizedBox(height: 16),
                         ],
                       ),
@@ -60,7 +67,7 @@ class RepairsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchSection(BuildContext context) {
+  Widget _buildSearchSection(BuildContext contextC) {
     return Card(
       elevation: 0,
       color: Colors.white,
@@ -74,8 +81,29 @@ class RepairsScreen extends StatelessWidget {
             TextFormFieldWidget(
               icon: Icons.search,
               label: 'Buscar...',
-              onChanged: (value) => BlocProvider.of<RepairsBloc>(context)
+              onChanged: (value) => BlocProvider.of<RepairsBloc>(contextC)
                   .add(SearchRepairsEvent(query: value)),
+            ),
+            const SizedBox(height: 16),
+            BlocBuilder<RepairsBloc, RepairsState>(
+              builder: (context, state) => ButtonWidget(
+                label: 'Fecha',
+                icon: Icons.date_range,
+                onPressed: () {
+                  showRangePickerDialog(
+                    context: context,
+                    minDate: DateTime(2000, 1, 1),
+                    maxDate: DateTime.now(),
+                  ).then((date) {
+                    if (date != null) {
+                      BlocProvider.of<RepairsBloc>(context).add(
+                          SetIntervalDatetimeRepairsEvent(
+                              startedAt: date.start.toUtc().toIso8601String(),
+                              endedAt: date.end.toUtc().toIso8601String()));
+                    }
+                  });
+                },
+              ),
             ),
           ],
         ),
@@ -83,7 +111,7 @@ class RepairsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildResultsSection() {
+  Widget _buildResultsSection(RepairsState state) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -92,27 +120,50 @@ class RepairsScreen extends StatelessWidget {
           children: [
             const TitleWidget(title: 'Resultados'),
             const SizedBox(height: 8),
-            // FutureBuilder(future: Services, builder: builder),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 8,
-              itemBuilder: (context, index) {
-                return _buildServiceCard(
-                  'Maquina ${index == 1 ? 'Overlock' : 'Recta'} - Servicio #${124 + index}',
-                  'Esteban Adolfo',
-                  '2025-10-18',
-                  index == 1 ? 'Entregado' : 'En Proceso',
-                  onTap: () {
-                    BlocProvider.of<NavDsbBloc>(context).add(
-                      OpenDetailsNavDsb(
-                        title:
-                            'Maquina ${index == 1 ? 'Overlock' : 'Recta'} - Servicio #${124 + index}',
-                        child: RepairDetail(),
-                      ),
-                    );
-                  },
-                );
+            FutureBuilder<DataListModel<RepairModel>>(
+              future: RepairsService().getRepairs(
+                token: Prefs.init!.getString(Prefs.token) ?? "",
+                search: '',
+                startedAt: state.startedAt,
+                endedAt: state.endedAt,
+                limit: 20,
+                page: 1,
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final data = snapshot.data as DataListModel<RepairModel>;
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: data.count,
+                    itemBuilder: (context, index) {
+                      return _buildServiceCard(
+                        title: 'Servicio #${data.data[index].id}',
+                        client: data.data[index].machine.companyName,
+                        machine:
+                            '${data.data[index].machine.typeName} - ${data.data[index].machine.serial}',
+                        date: DateFormat.yMMMMd('es_ES')
+                            .format(data.data[index].startedAt.toLocal()),
+                        // date: data.data[index].startedAt.toLocal().toString(),
+                        status: data.data[index].status,
+                        onTap: () {
+                          BlocProvider.of<NavDsbBloc>(context).add(
+                            OpenDetailsNavDsb(
+                              title: 'Servicio #${data.data[index].id}',
+                              child: RepairDetail(
+                                data.data[index],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                } else if (snapshot.hasError) {
+                  return Text(snapshot.error.toString());
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
               },
             ),
             Center(
@@ -127,13 +178,22 @@ class RepairsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildServiceCard(
-    String title,
-    String client,
-    String date,
-    String status, {
+  Widget _buildServiceCard({
+    required String title,
+    required String client,
+    required String machine,
+    required String date,
+    required int status,
     required VoidCallback onTap,
   }) {
+    int status2 = 0; // pendiente
+    if (status == 2 || status == 3) {
+      // en proceso
+      status2 = 1;
+    } else if (status == 4 || status == 5) {
+      // finalizado
+      status2 = 2;
+    }
     return Card(
       elevation: 2,
       color: Colors.white,
@@ -157,28 +217,26 @@ class RepairsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Cliente: $client', style: const TextStyle(fontSize: 13)),
+            Text('Maquina: $machine', style: const TextStyle(fontSize: 13)),
             Text('Recepción: $date', style: const TextStyle(fontSize: 13)),
           ],
         ),
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: status == 'Entregado'
+            color: status2 == 2
                 ? Colors.green[50]
-                : status == 'Cancelado'
-                    ? Colors.red[50]
-                    : Colors.orange[50],
+                : (status2 == 1 ? Colors.orange[50] : Colors.red[50]),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            status,
+            status2 == 2
+                ? 'Entregado'
+                : (status2 == 1 ? 'En Proceso' : 'Pendiente'),
             style: TextStyle(
-              color: status == 'Entregado'
-                  ? Colors.green
-                  : status == 'Cancelado'
-                      ? Colors.red
-                      : Colors.orange,
-            ),
+                color: status2 == 2
+                    ? Colors.green
+                    : (status2 == 1 ? Colors.orange : Colors.red)),
           ),
         ),
       ),

@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mcs_app/assets/scripts/prefs.dart';
 
 import 'package:mcs_app/models/machine_model.dart';
 import 'package:mcs_app/models/response_model.dart';
 
-class MachinesService {
+class MachinesService implements Service<MachineModel> {
   static final mainUrl = dotenv.get('API_URL', fallback: 'API_URL not found');
   static Future<String> create({
     required String companyId,
@@ -41,7 +42,8 @@ class MachinesService {
     }).catchError((err) => throw err);
   }
 
-  static Future<DataListModel<MachineBasicModel>> getMachinesBasic({
+  @override
+  Future<DataListModel<MachineModel>> getSearch({
     required String token,
     String search = '',
     required int limit,
@@ -53,7 +55,7 @@ class MachinesService {
     return http
         .get(
       Uri.parse(
-          '$mainUrl/machine/machines-rebuild-basic-byserial?serial=$search&limit=$limit&page=$page'),
+          '$mainUrl/machine/machines?&search=$search&limit=$limit&page=$page'),
       headers: headers,
     )
         .then((res) {
@@ -61,9 +63,9 @@ class MachinesService {
       ResponseModel r = ResponseModel(data);
 
       if (r.code != 200) throw r.msg;
-      return DataListModel<MachineBasicModel>(
+      return DataListModel<MachineModel>(
         count: data['count'],
-        data: MachineBasicModel.fromList(data['data']),
+        data: MachineModel.fromList(data['data']),
       );
     }).catchError((err) => throw err);
   }

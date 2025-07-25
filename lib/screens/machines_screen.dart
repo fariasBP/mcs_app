@@ -273,11 +273,11 @@ class MachinesScreen extends StatelessWidget {
     required Function()? onDelete,
   }) {
     return FutureBuilder(
-      future: MachinesService.getMachinesBasic(
-          search: search, token: 'asdfa', limit: 15, page: 1),
+      future: MachinesService()
+          .getSearch(search: search, token: 'asdfa', limit: 15, page: 1),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final data = snapshot.data as DataListModel<MachineBasicModel>;
+          final data = snapshot.data as DataListModel<MachineModel>;
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: data.data.length,

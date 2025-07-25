@@ -34,19 +34,29 @@ class RepairsService implements Service<RepairModel> {
     }).catchError((err) => throw err);
   }
 
-  static Future<DataListModel<RepairModel>> getServices({
+  Future<DataListModel<RepairModel>> getRepairs({
     required String token,
     String search = '',
+    String startedAt = '',
+    String endedAt = '',
+    bool ascending = true,
+    int status = 0,
     required int limit,
     required int page,
   }) {
     final headers = {
       'Access-Token': token,
     };
+    String asc = 'true';
+    if (!ascending) {
+      asc = 'false';
+    }
+
     return http
         .get(
       Uri.parse(
-          '$mainUrl/service/services?machine_id=$search&limit=$limit&page=$page'),
+        '$mainUrl/service/services?search=$search&started_at=$startedAt&ended_at=$endedAt&ascending=$asc&status=$status&limit=$limit&page=$page',
+      ),
       headers: headers,
     )
         .then((res) {
@@ -73,7 +83,7 @@ class RepairsService implements Service<RepairModel> {
     return http
         .get(
       Uri.parse(
-          '$mainUrl/service/services?machine_id=$search&limit=$limit&page=$page'),
+          '$mainUrl/service/services?search=$search&limit=$limit&page=$page'),
       headers: headers,
     )
         .then((res) {

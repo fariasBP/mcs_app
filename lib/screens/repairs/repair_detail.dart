@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:mcs_app/models/machine_model.dart';
+import 'package:mcs_app/models/repair_model.dart';
 import 'package:mcs_app/widgets/button_widget.dart';
 import 'package:mcs_app/widgets/timeline_widget.dart';
 import 'package:mcs_app/widgets/title_widget.dart';
 
 class RepairDetail extends StatelessWidget {
-  const RepairDetail({super.key});
+  final RepairModel repair;
+
+  const RepairDetail(this.repair, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +20,7 @@ class RepairDetail extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 16),
-                _buildServiceStatus(context),
+                _buildServiceStatus(context, repair.status),
                 const SizedBox(height: 16),
                 _buildQuickActions(),
                 const SizedBox(height: 16),
@@ -48,8 +52,8 @@ class RepairDetail extends StatelessWidget {
     );
   }
 
-  Widget _buildServiceStatus(BuildContext context) {
-    int status = 3;
+  Widget _buildServiceStatus(BuildContext context, int status) {
+    status = status + 1;
     List<Map<String, dynamic>> listJson = [
       {
         'icon': Icons.description_outlined,
@@ -325,7 +329,7 @@ class RepairDetail extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text('Miktex'),
+                      Text(repair.machine.companyName),
                       const SizedBox(height: 8),
                       const Text(
                         'Encargado:',
@@ -333,7 +337,7 @@ class RepairDetail extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text('David Montalvo'),
+                      Text(repair.machine.companyManager),
                       const SizedBox(height: 8),
                       const Text(
                         'Contacto:',
@@ -341,7 +345,7 @@ class RepairDetail extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text('69804765'),
+                      Text(repair.machine.companyContact),
                     ],
                   ),
                 ),
@@ -409,12 +413,20 @@ class RepairDetail extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Serie:',
+                        'Tipo de máquina:',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text('35656347666'),
+                      Text(repair.machine.typeName),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Marca:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(repair.machine.brandName),
                       const SizedBox(height: 8),
                       const Text(
                         'Modelo:',
@@ -422,15 +434,15 @@ class RepairDetail extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text('Jdk-234'),
+                      Text(repair.machine.model),
                       const SizedBox(height: 8),
                       const Text(
-                        'Tipo de máquina:',
+                        'Serie:',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text('Recta'),
+                      Text(repair.machine.serial),
                     ],
                   ),
                 ),

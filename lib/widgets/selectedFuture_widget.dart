@@ -83,7 +83,14 @@ class _SelectedBuild<T> extends StatefulWidget {
 }
 
 class _SelectedBuildState<T> extends State<_SelectedBuild<T>> {
+  final TextEditingController controller = TextEditingController();
   String search = '';
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +99,7 @@ class _SelectedBuildState<T> extends State<_SelectedBuild<T>> {
       child: Column(
         children: [
           TextFormFieldWidget(
-            controller: widget.controller,
+            controller: controller,
             icon: Icons.search,
             label: widget.label,
             onChanged: (value) {
